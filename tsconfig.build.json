@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/app" },
+    { "path": "packages/emulator" },
+    { "path": "packages/extension" },
+    { "path": "packages/fs" },
+    { "path": "packages/project" },
+    { "path": "packages/resource" },
+    { "path": "packages/ui" }
+  ]
+}
