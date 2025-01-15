@@ -5,7 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "tsc --build --verbose tsconfig.build.json"
+    "build": "tsc --build --verbose tsconfig.build.json",
+    "install": "tsc --build --verbose tsconfig.build.json"
   },
   "devDependencies": {
     "typescript": "^5.7.3"
