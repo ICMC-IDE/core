@@ -1,4 +1,4 @@
-import { type Extension, Extensions } from "@core/extension";
+import { type Extension, get as getExtension } from "@core/extension";
 
 class Program extends EventTarget {
   async query(uri: URL): Promise<any> {
@@ -36,7 +36,7 @@ class Program extends EventTarget {
     }
   }
   resolve(uri: URL): Extension | undefined {
-    return Extensions.get(uri.protocol.slice(0, -1));
+    return getExtension(uri.protocol.slice(0, -1));
   }
 }
 
