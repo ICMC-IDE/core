@@ -1,4 +1,4 @@
-import { type Extension, get as getExtension } from "@core/extension";
+import { type Extension, get as getExtension } from "extension";
 
 class Program extends EventTarget {
   async query(uri: URL): Promise<any> {

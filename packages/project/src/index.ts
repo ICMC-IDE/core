@@ -1,4 +1,4 @@
-import { type VirtualDirectory, VirtualFile } from "@core/fs";
+import { type VirtualDirectory, VirtualFile } from "fs";
 
 class Project extends EventTarget {}
 

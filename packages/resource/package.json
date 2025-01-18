@@ -1,9 +1,13 @@
 {
   "name": "resource",
   "version": "1.0.0",
+  "type": "module",
+  "source": "src/index.ts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "author": "",
   "license": "GPLv3",
-  "description": ""
+  "private": true,
+  "scripts": {
+    "build": "parcel build"
+  }
 }

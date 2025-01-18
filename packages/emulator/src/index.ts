@@ -18,3 +18,5 @@ export interface Register {
   read(): number;
   write(value: number): void;
 }
+
+export default {};
