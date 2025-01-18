@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "prepack": "npm -ws run build"
+    "prepare": "npm -ws run build"
   },
   "devDependencies": {
     "@parcel/packager-ts": "^2.13.3",
