@@ -8,6 +8,6 @@
   "license": "GPLv3",
   "private": true,
   "scripts": {
-    "build": "parcel build"
+    "build": "parcel build --no-autoinstall"
   }
 }

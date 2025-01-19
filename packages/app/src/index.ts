@@ -12,14 +12,14 @@ class Program extends EventTarget {
     if (!extension) {
       // TODO: Show error message to user
       console.error(
-        `[CORE] No extension registered for protocol: ${uri.protocol}`,
+        `[CORE:APP] No extension registered for protocol: ${uri.protocol}`,
       );
       return;
     }
 
     try {
       const result = await extension.module.query(uri);
-      console.info(`[CORE] Query result for ${uri}:`, result);
+      console.info(`[CORE:APP] Query result for ${uri}:`, result);
 
       // Allows for chaining queries and redirects
       if (result instanceof URL) {
@@ -30,7 +30,7 @@ class Program extends EventTarget {
     } catch (error) {
       // TODO: Show error message to user
       console.error(
-        `[CORE] Error querying extension for protocol: ${uri.protocol}`,
+        `[CORE:APP] Error querying extension for protocol: ${uri.protocol}`,
         error,
       );
     }

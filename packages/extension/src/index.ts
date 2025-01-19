@@ -56,8 +56,7 @@ async function fetchModule(origin: URL): Promise<any> {
   return await import(url.href);
 }
 
-async function loadExtension(path: string): Promise<Extension> {
-  const origin = new URL(path, import.meta.url);
+async function loadExtension(origin: URL): Promise<Extension> {
   const metadata = await fetchMetadata(origin);
   const [module, stylesheet] = await Promise.all([
     fetchModule(origin),
@@ -73,19 +72,19 @@ async function loadExtension(path: string): Promise<Extension> {
   };
 }
 
-export async function load(path: string) {
+export async function load(url: URL) {
   try {
-    const extension = await loadExtension(path);
+    const extension = await loadExtension(url);
 
     // TODO: Validate module, check if it has the required methods, etc.
     extensions[extension.metadata.id] = extension;
     console.info(
-      `[CORE] Extension loaded: ${extension.metadata.title} (${extension.metadata.id})`,
+      `[CORE:EXTENSION] Extension loaded: ${extension.metadata.title} (${extension.metadata.id})`,
     );
     await extension.module.load();
     // TODO: Dispatch event to notify that the extension was loaded
   } catch (error) {
-    console.error(`[CORE] Error loading extension from path: ${path}`, error);
+    console.error(`[CORE:EXTENSION] Error loading extension from url: ${url}`, error);
   }
 }
 
