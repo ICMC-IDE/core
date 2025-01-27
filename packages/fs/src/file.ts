@@ -71,10 +71,8 @@ export default class VirtualFile extends VirtualObject<FileSystemFileHandle> {
   }
 
   async copy(directory: VirtualDirectory, name: string = this.name) {
-    const content = await this.read();
-    const newFile = await directory.createFile(name);
-    await newFile.write(content);
-    return newFile;
+    // TODO: implement
+
   }
 
   async move(directory: VirtualDirectory, name: string = this.name) {
@@ -92,32 +90,4 @@ export default class VirtualFile extends VirtualObject<FileSystemFileHandle> {
     }
     await this.move(this.parent!, name);
   }
-}
-
-const ASSETS_PATH = "assets/";
-const ASSETS_LIST = ASSETS_PATH + "/assets.json";
-
-export async function loadAssets(
-  directory: VirtualDirectory,
-  loadUserAssets: boolean,
-  overwrite = false,
-) {
-  const assets = (await (await fetch(ASSETS_LIST)).json()) as {
-    user: string[];
-    internal: string[];
-  };
-
-  await Promise.all(
-    [assets.internal, loadUserAssets ? assets.user : []]
-      .flat()
-      .map(async (asset) => {
-        if (!overwrite && (await directory.hasFile(asset))) {
-          return;
-        }
-
-        const content = await (await fetch(ASSETS_PATH + asset)).arrayBuffer();
-        const file = await directory.createFile(asset, true);
-        return await file.write(content);
-      }),
-  );
 }

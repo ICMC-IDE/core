@@ -1,6 +1,8 @@
-import { type VirtualDirectory, VirtualFile } from "fs";
+let currentProject = "blank";
 
-class Project extends EventTarget {}
+export class Project extends EventTarget {
+
+}
 
 export default new Project();
 

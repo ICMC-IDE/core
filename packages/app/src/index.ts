@@ -1,18 +1,35 @@
 import { type Extension, get as getExtension } from "extension";
+import * as VirtualFilesystem from "fs";
+
+const root = new VirtualFilesystem.VirtualDirectory(
+  "",
+  undefined,
+  await navigator.storage.getDirectory(),
+);
 
 class Program extends EventTarget {
   async query(uri: URL): Promise<any> {
-    if (uri.protocol === "file:") {
-      // TODO: Implement file protocol
-      return;
+    switch (uri.protocol) {
+      case "file:":
+        return await this.#queryFilesystem(uri);
+      case "extension:": {
+        return await this.#queryExtension(uri);
+      }
     }
 
-    const extension = this.resolve(uri);
+  }
+
+  async #queryFilesystem(uri: URL): Promise<VirtualFilesystem.VirtualFile | VirtualFilesystem.VirtualDirectory | undefined> {
+    return await root.query(uri.pathname);
+  }
+
+  async #queryExtension(uri: URL): Promise<any> {
+    const extension = getExtension(uri.hostname);
 
     if (!extension) {
       // TODO: Show error message to user
       console.error(
-        `[CORE:APP] No extension registered for protocol: ${uri.protocol}`,
+        `[CORE:APP] No extension registered with id: ${uri.hostname}`,
       );
       return;
     }
@@ -30,13 +47,10 @@ class Program extends EventTarget {
     } catch (error) {
       // TODO: Show error message to user
       console.error(
-        `[CORE:APP] Error querying extension for protocol: ${uri.protocol}`,
+        `[CORE:APP] Error querying extension id: ${uri.hostname}`,
         error,
       );
     }
-  }
-  resolve(uri: URL): Extension | undefined {
-    return getExtension(uri.protocol.slice(0, -1));
   }
 }
 

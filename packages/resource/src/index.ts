@@ -38,3 +38,19 @@ declare global {
     ): void;
   }
 }
+
+export interface ResourceMap {}
+
+class ResourceManager {
+  #resources: Partial<{
+    [Key in keyof ResourceMap]: Resource<ResourceMap[Key]>;
+  }> = {};
+
+  get<T extends keyof ResourceMap>(key: T): Resource<ResourceMap[T]> | undefined {
+    const resource = this.#resources[key];
+
+    return resource;
+  }
+}
+
+export const manager = new ResourceManager();

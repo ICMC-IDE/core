@@ -2,53 +2,7 @@ import VirtualObject from "./object";
 import VirtualFile from "./file";
 
 export default class VirtualDirectory extends VirtualObject<FileSystemDirectoryHandle> {
-  #directoriesCache: VirtualDirectory[] = [];
-  #filesCache: VirtualFile[] = [];
-
-  newChildDirectory(name: string) {
-    let directory = this.#directoriesCache.find(
-      (directory) => directory.name === name,
-    );
-    if (!directory) {
-      directory = new VirtualDirectory(name, this);
-      this.#directoriesCache.push(directory);
-    }
-    return directory;
-  }
-
-  newChildFile(name: string) {
-    let file = this.#filesCache.find((file) => file.name === name);
-    if (!file) {
-      file = new VirtualFile(name, this);
-      this.#filesCache.push(file);
-    }
-    return file;
-  }
-
-  resolveDirectory(path: string[]): VirtualDirectory {
-    if (path.length === 0) {
-      return this;
-    }
-
-    let part = path.shift()!;
-    while (part === "." || part === "") {
-      part = path.shift()!;
-    }
-
-    const nextDirectory = this.newChildDirectory(part);
-
-    if (path.length === 0) {
-      return nextDirectory;
-    }
-    return nextDirectory.resolveDirectory(path);
-  }
-
-  resolveFile(path: string[]) {
-    const directory = this.resolveDirectory(path.slice(0, -1));
-    const filename = path.at(-1)!;
-
-    return directory.newChildFile(filename);
-  }
+  #cache: Record<string, WeakRef<VirtualFile | VirtualDirectory>> = {};
 
   async create(createParents = false) {
     if (this.loaded) {
@@ -74,33 +28,98 @@ export default class VirtualDirectory extends VirtualObject<FileSystemDirectoryH
     this.handle = await this.parent!.handle!.getDirectoryHandle(this.name);
   }
 
-  async getDirectory(path: string, load = true) {
-    const directory = this.resolveDirectory(path.split("/"));
-    if (load) {
-      await directory.load();
+  async touch(name: string, isFolder: true): Promise<VirtualDirectory>;
+  async touch(name: string, isFolder: false): Promise<VirtualFile>;
+  async touch(name: string, isFolder: boolean = false) {
+    // TODO: validate name
+    const cached = this.#getCached(name);
+
+    if (cached) {
+      return cached;
     }
-    return directory;
-  }
 
-  async getFile(path: string, load = true) {
-    const file = this.resolveFile(path.split("/"));
-    if (load) {
-      await file.load();
+    let entry;
+
+    if (isFolder) {
+      const handle = await this.handle!.getDirectoryHandle(name, { create: true });
+      entry = new VirtualDirectory(name, this, handle);
+    } else {
+      const handle = await this.handle!.getFileHandle(name, { create: true });
+      entry = new VirtualFile(name, this, handle);
     }
-    return file;
+
+    this.#cache[name] = new WeakRef(entry);
+    return entry;
   }
 
-  async createDirectory(path: string, createParents = false) {
-    const directory = await this.getDirectory(path, false);
-    await directory.create(createParents);
-    return directory;
+  async query(path: string): Promise<VirtualFile | VirtualDirectory | undefined> {
+    path = path.replace(/\/+/, "/");
+
+    // Absolute path
+    if (path.startsWith("/")) {
+      let entry: VirtualDirectory = this;
+
+      while (entry.parent) {
+        entry = entry.parent;
+      }
+
+      return entry.query(path.substring(1));
+    }
+
+    // Relative path
+    const way = path.split("/");
+    let entry: VirtualDirectory = this;
+
+    while (way.length > 0) {
+      const part = way.shift()!;
+
+      let nextEntry = await entry.get(part);
+
+      if (nextEntry instanceof VirtualFile) {
+        if (way.length > 0) {
+          throw new Error("Invalid path");
+        }
+
+        return nextEntry;
+      } else {
+        entry = nextEntry;
+      }
+    }
+
+    return entry;
   }
 
-  async createFile(path: string, createParents = false) {
-    const file = await this.getFile(path, false);
-    await file.create(createParents);
-    return file;
+  async get(name: string) {
+    if (name === "." || name.length === 0) {
+      return this;
+    } else if (name === "..") {
+      return this.parent ?? this;
+    }
+
+    const cached = this.#getCached(name);
+
+    if (cached) {
+      return cached;
+    }
+
+    let entry;
+
+    try {
+      const handle = await this.handle!.getDirectoryHandle(name);
+      entry = new VirtualDirectory(name, this, handle);
+    } catch(error) {
+      if (error instanceof DOMException && error.name === "TypeMismatchError") {
+        const handle = await this.handle!.getFileHandle(name);
+        entry = new VirtualFile(name, this, handle);
+      } else {
+        throw error;
+      }
+    }
+
+    this.#cache[name] = new WeakRef(entry!);
+    return entry;
   }
+
 
   async delete() {
     await this.parent!.handle!.removeEntry(this.name, { recursive: true });
@@ -108,7 +127,7 @@ export default class VirtualDirectory extends VirtualObject<FileSystemDirectoryH
   }
 
   async copy(directory: VirtualDirectory, name: string = this.name) {
-    const newDirectory = await directory.createDirectory(name);
+    const newDirectory = await directory.touch(name, true);
 
     for await (const object of this.list()) {
       await object.copy(newDirectory);
@@ -133,35 +152,23 @@ export default class VirtualDirectory extends VirtualObject<FileSystemDirectoryH
     await this.move(this.parent!, name);
   }
 
-  async hasDirectory(path: string) {
-    try {
-      await this.getDirectory(path);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  async hasFile(path: string) {
-    try {
-      await this.getFile(path);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
   async *list() {
     for await (const [name, handle] of this.handle!.entries()) {
-      if (handle instanceof FileSystemFileHandle) {
-        const file = this.newChildFile(name);
-        file.handle = handle;
-        yield file;
-      } else {
-        const directory = this.newChildDirectory(name);
-        directory.handle = handle as FileSystemDirectoryHandle;
-        yield directory;
+      yield this.get(name)!;
+    }
+  }
+
+  #getCached(name: string) {
+    const cache = this.#cache[name];
+
+    if (cache) {
+      const entry = cache.deref();
+
+      if (entry) {
+        return entry;
       }
+
+      delete this.#cache[name];
     }
   }
 }
