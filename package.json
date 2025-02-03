@@ -4,11 +4,8 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/icmc-ide/core.git"
+    "url": "git+https://github.com/icmc-ide/core.git"
   },
-  "workspaces": [
-    "packages/*"
-  ],
   "exports": {
     "./*": {
       "types": "./dist/*.d.ts",
@@ -16,7 +13,7 @@
     }
   },
   "scripts": {
-    "prepare": "rollup -c",
+    "build": "rollup -c",
     "lint": "eslint ."
   },
   "devDependencies": {

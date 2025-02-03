@@ -1,5 +1,4 @@
-**/src
-**/.parcel-cache
+src/
 package-lock.json
 tsconfig.json
 eslint.config.mjs
