@@ -2,5 +2,6 @@ src/
 package-lock.json
 tsconfig.json
 eslint.config.mjs
+rollup.config.js
 .gitignore
 .github
