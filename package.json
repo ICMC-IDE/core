@@ -1,5 +1,5 @@
 {
-  "name": "core",
+  "name": "@icmc-ide/core",
   "version": "1.0.3",
   "type": "module",
   "repository": {
