@@ -84,7 +84,10 @@ export async function load(url: URL) {
     await extension.module.load();
     // TODO: Dispatch event to notify that the extension was loaded
   } catch (error) {
-    console.error(`[CORE:EXTENSION] Error loading extension from url: ${url}`, error);
+    console.error(
+      `[CORE:EXTENSION] Error loading extension from url: ${url}`,
+      error,
+    );
   }
 }
 

@@ -70,18 +70,12 @@ export default class VirtualFile extends VirtualObject<FileSystemFileHandle> {
     this.handle = undefined;
   }
 
-  async copy(directory: VirtualDirectory, name: string = this.name) {
+  async copy(directory: VirtualDirectory, _name: string = this.name) {
     // TODO: implement
-
   }
 
-  async move(directory: VirtualDirectory, name: string = this.name) {
-    const newFileHandle = (await this.copy(directory, name)).handle!;
-    await this.delete();
-
-    this.handle = newFileHandle;
-    this.name = name;
-    this.parent = directory;
+  async move(directory: VirtualDirectory, _name: string = this.name) {
+    // TODO: implement
   }
 
   async rename(name: string) {

@@ -1,8 +1,6 @@
 let currentProject = "blank";
 
-export class Project extends EventTarget {
-
-}
+export class Project extends EventTarget {}
 
 export default new Project();
 

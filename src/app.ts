@@ -1,5 +1,5 @@
-import { type Extension, get as getExtension } from "extension";
-import * as VirtualFilesystem from "fs";
+import { get as getExtension } from "./extension";
+import * as VirtualFilesystem from "./fs";
 
 const root = new VirtualFilesystem.VirtualDirectory(
   "",
@@ -16,10 +16,15 @@ class Program extends EventTarget {
         return await this.#queryExtension(uri);
       }
     }
-
   }
 
-  async #queryFilesystem(uri: URL): Promise<VirtualFilesystem.VirtualFile | VirtualFilesystem.VirtualDirectory | undefined> {
+  async #queryFilesystem(
+    uri: URL,
+  ): Promise<
+    | VirtualFilesystem.VirtualFile
+    | VirtualFilesystem.VirtualDirectory
+    | undefined
+  > {
     return await root.query(uri.pathname);
   }
 
