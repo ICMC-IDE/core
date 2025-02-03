@@ -32,4 +32,6 @@ jobs:
       - name: Publish package
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm publish
+        run: |
+          cp $NPM_CONFIG_USERCONFIG .npmrc
+          npm publish
