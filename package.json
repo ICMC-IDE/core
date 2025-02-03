@@ -16,7 +16,7 @@
     }
   },
   "scripts": {
-    "prepare": "npm -ws run build",
+    "build": "npm -ws run build",
     "lint": "eslint ."
   },
   "devDependencies": {
