@@ -5,6 +5,12 @@
   "workspaces": [
     "packages/*"
   ],
+  "exports": {
+    "./*": {
+      "types": "./packages/*/dist/index.d.ts",
+      "default": "./packages/*/dist/index.js"
+    }
+  },
   "scripts": {
     "prepare": "npm -ws run build",
     "lint": "eslint ."

@@ -1,0 +1,6 @@
+**/src
+**/.parcel-cache
+package-lock.json
+tsconfig.json
+eslint.config.mjs
+.gitignore
